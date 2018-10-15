@@ -1,0 +1,8 @@
+<div class="panel panel-success">
+  <div class="panel-heading">
+    <a [routerLink]="['/newsList',{page:currentPage,id:item.id}]"><i class="fa fa-reply" aria-hidden="true"></i>newsList</a>
+  </div>
+  <div class="panel-body">
+    {{item?.id}}  {{item?.value}}
+  </div>
+</div>
