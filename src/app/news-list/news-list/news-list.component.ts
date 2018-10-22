@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { map, withLatestFrom, take } from 'rxjs/operators';
+import { map, withLatestFrom, mapTo, merge, takeWhile } from 'rxjs/operators';
 import { NewsService } from '../news.service';
 import { BehaviorSubject } from 'rxjs';
 
@@ -16,17 +16,14 @@ export class NewsListComponent implements OnInit {
   MAX_PAGE;
   pages$;
   news$;
+  update$;
   currentPage$ = new BehaviorSubject(1);
   currentNews$;
+  fetchUpdate() {
+    this.service.updateComplete$.next(false);
+  }
   setCurrentPage(n) {
-    if (n <= 1) {
-      n = 1;
-    } else if (n > this.service.TOTAL_PAGE_COUNT / this.MAX_COUNT) {
-      n = this.service.TOTAL_PAGE_COUNT / this.MAX_COUNT;
-    }
-    this.currentPage = n;
-    this.currentPage$.next(n);
-    this.service.getNews((n - 1) * this.MAX_COUNT, n * this.MAX_COUNT);
+    this.currentPage$.next(this.currentPage = Math.max(1, Math.min(this.service.TOTAL_PAGE_COUNT / this.MAX_COUNT, n)) || 1);
   }
   getPageList(cur) {
     let m = Math.floor(cur / this.MAX_PAGE);
@@ -41,16 +38,12 @@ export class NewsListComponent implements OnInit {
     }
     return arr;
   }
-  constructor(private route: ActivatedRoute, private service: NewsService) {}
+  constructor(private route: ActivatedRoute, private service: NewsService) { }
 
   ngOnInit() {
     this.route.data.subscribe(param => {
-      const data = param.items;
-      this.activeNews = data.activeNews;
-      this.MAX_COUNT = data.count;
-      this.MAX_PAGE = data.page;
-      this.news$ = data.news;
-      this.setCurrentPage(data.currentPage);
+      ({ activeNews: this.activeNews, count: this.MAX_COUNT, page: this.MAX_PAGE, news: this.news$ } = param.items);
+      this.setCurrentPage(param.items.currentPage);
     });
     this.currentNews$ = this.currentPage$.pipe(withLatestFrom(this.news$, (cur, news) => {
       return news.slice((cur - 1) * this.MAX_COUNT, cur * this.MAX_COUNT);

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { NewsService } from './news.service';
-import { take, map, toArray, switchMap } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 @Injectable()
 export class NewsListResolverService implements Resolve<any> {
@@ -15,9 +15,7 @@ export class NewsListResolverService implements Resolve<any> {
         if (!items.find(item => item.id === id)) {
           id = null;
         }
-        if (page > this.service.TOTAL_PAGE_COUNT / o.count || page < 1) {
-          page = 1;
-        }
+        page = Math.max(1, Math.min(this.service.TOTAL_PAGE_COUNT / o.count, page)) || 1;
         return { count: o.count, page: o.page, news: o.news, activeNews: id, currentPage: page };
       }));
   }

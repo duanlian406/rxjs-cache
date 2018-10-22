@@ -20,7 +20,8 @@ import { NewsListResolverService } from './news-list-resolver.service';
       provide: 'LIST_CONF', useValue: {
         api: 'http://localhost:8888/',
         count: 10,
-        page: 5,
+        page: 10,
+        preloadInterval: 1000
       }
     },
     {
